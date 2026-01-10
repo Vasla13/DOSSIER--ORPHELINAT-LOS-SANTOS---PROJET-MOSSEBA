@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DOSSIER MOSSEBA — Timeline</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <strong>DOSSIER MOSSEBA</strong>
+        <span>Timeline + preuves (site statique)</span>
+      </div>
+
+      <nav class="nav" aria-label="Navigation">
+        <button data-view="timeline" aria-current="page">Timeline</button>
+        <button data-view="documents" aria-current="false">Documents</button>
+        <button data-view="people" aria-current="false">Personnes</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <aside class="panel sidebar" id="sidebar"></aside>
+
+    <section class="panel content" id="content">
+      <!-- rendu JS -->
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-label="Détails">
+    <div class="modal" id="modal">
+      <header>
+        <div class="mbar">
+          <h3>—</h3>
+          <button class="close" type="button">Fermer</button>
+        </div>
+      </header>
+      <div class="body"></div>
+    </div>
+  </div>
+
+  <!-- IMPORTANT: timeline.js DOIT être chargé AVANT app.js -->
+  <script src="data/timeline.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
