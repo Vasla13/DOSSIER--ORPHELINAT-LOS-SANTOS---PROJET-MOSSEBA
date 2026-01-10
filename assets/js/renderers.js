@@ -101,7 +101,7 @@ export function renderContent(root, data, state){
   return renderTimeline(root, data, state);
 }
 
-// 4. GRAPHE RELATIONNEL (CORRIGÉ AVEC ZOOM)
+// 4. GRAPHE RELATIONNEL (COMPACTÉ)
 function renderGraph(root, data, state) {
     if(!window.d3) {
         root.innerHTML = "<div class='kpi' style='color:red'>Erreur : D3.js non chargé.</div>";
@@ -111,7 +111,7 @@ function renderGraph(root, data, state) {
     root.innerHTML = `<div id="graph-container"></div>`;
     const container = document.getElementById("graph-container");
     const width = container.clientWidth;
-    const height = container.clientHeight || 800; // Utilise la hauteur réelle si dispo
+    const height = container.clientHeight || 800; 
 
     // 1. Préparer les données (Filtrées)
     const nodes = [];
@@ -150,12 +150,12 @@ function renderGraph(root, data, state) {
         return;
     }
 
-    // 2. Simulation D3
+    // 2. Simulation D3 (PARAMÈTRES AJUSTÉS POUR ÊTRE PLUS COMPACT)
     const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(120)) // Distance un peu plus grande
-        .force("charge", d3.forceManyBody().strength(-400)) // Répulsion plus forte
+        .force("link", d3.forceLink(links).id(d => d.id).distance(50)) // Distance réduite (était 120)
+        .force("charge", d3.forceManyBody().strength(-80)) // Répulsion très réduite (était -400)
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide().radius(40));
+        .force("collide", d3.forceCollide().radius(20)); // Collision réduite (était 40)
 
     // 3. SVG & Zoom
     const svg = d3.select("#graph-container").append("svg")
@@ -163,17 +163,15 @@ function renderGraph(root, data, state) {
         .attr("height", "100%")
         .attr("viewBox", [0, 0, width, height]);
 
-    // Groupe principal qui va recevoir le zoom/pan
     const g = svg.append("g");
 
-    // Comportement de Zoom
     const zoom = d3.zoom()
-        .scaleExtent([0.1, 4]) // Zoom min 0.1x, max 4x
+        .scaleExtent([0.1, 4])
         .on("zoom", (event) => {
             g.attr("transform", event.transform);
         });
 
-    svg.call(zoom); // Attacher le zoom au SVG entier
+    svg.call(zoom);
 
     // Liens
     const link = g.append("g")
@@ -186,10 +184,10 @@ function renderGraph(root, data, state) {
 
     // Noeuds
     const node = g.append("g")
-        .selectAll(".node") // Sélecteur important
+        .selectAll(".node")
         .data(nodes)
         .join("g")
-        .attr("class", "node") // AJOUT DE LA CLASSE CSS ICI
+        .attr("class", "node")
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
@@ -197,10 +195,9 @@ function renderGraph(root, data, state) {
 
     // Cercles
     node.append("circle")
-        .attr("r", d => d.group === 1 ? 14 : 9) // Personnes un peu plus grosses
-        .attr("fill", d => d.group === 1 ? "#1f6feb" : "#238636") // Bleu vs Vert
+        .attr("r", d => d.group === 1 ? 14 : 9)
+        .attr("fill", d => d.group === 1 ? "#1f6feb" : "#238636")
         .on("click", (event, d) => {
-             // Empêcher le zoom lors du click
              event.stopPropagation();
              if(d.type === "doc") {
                const btn = document.createElement("button");
@@ -219,7 +216,7 @@ function renderGraph(root, data, state) {
         .attr("y", 4)
         .text(d => d.name)
         .clone(true).lower()
-        .attr("stroke", "#000") // Contour noir pour lisibilité
+        .attr("stroke", "#000")
         .attr("stroke-width", 3)
         .attr("stroke-opacity", 0.8);
 
