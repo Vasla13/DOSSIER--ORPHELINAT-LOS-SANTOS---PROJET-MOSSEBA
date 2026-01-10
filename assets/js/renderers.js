@@ -25,10 +25,10 @@ export function renderSidebar(root, data, state){
         <option value="desc" ${state.sortDir==="desc"?"selected":""}>▼ Récent → Ancien</option>
       </select>
     </div>` : `<div class="kpi" style="margin-bottom:20px; font-size:11px; border-color:var(--accent); color:#fff; background:rgba(88,166,255,0.1)">
-        💡 <strong>Navigation :</strong><br>
-        • Molette : Zoomer<br>
-        • Clic-glisser (Fond) : Se déplacer<br>
-        • Clic-glisser (Noeud) : Bouger un élément
+        💡 <strong>Mode Enquête :</strong><br>
+        • Survol : Isoler les liens<br>
+        • Clic : Ouvrir le dossier<br>
+        • Molette : Zoomer
     </div>`}
 
     <div class="section">
@@ -101,45 +101,82 @@ export function renderContent(root, data, state){
   return renderTimeline(root, data, state);
 }
 
-// 4. GRAPHE RELATIONNEL
+// 4. GRAPHE RELATIONNEL (AVANCÉ)
 function renderGraph(root, data, state) {
     if(!window.d3) {
         root.innerHTML = "<div class='kpi' style='color:red'>Erreur : D3.js non chargé.</div>";
         return;
     }
 
-    root.innerHTML = `<div id="graph-container"></div>`;
+    // Légende
+    root.innerHTML = `
+      <div id="graph-legend">
+        <div><span style="background:#58a6ff"></span> Sujet</div>
+        <div><span style="background:#f85149"></span> Événement</div>
+        <div><span style="background:#238636"></span> Preuve</div>
+      </div>
+      <div id="graph-container"></div>
+    `;
+    
     const container = document.getElementById("graph-container");
     const width = container.clientWidth;
     const height = container.clientHeight || 800; 
 
+    // --- 1. PRÉPARATION DES DONNÉES (NOEUDS & LIENS) ---
     const nodes = [];
     const links = [];
-    const nodeSet = new Set();
+    const nodeSet = new Set(); // Pour éviter les doublons
 
+    // A. AJOUTER LES PERSONNES (BLEU)
     const people = (data.entities?.people || []).filter(p => matchByQuery(p, state.query, data));
     people.forEach(p => {
-        nodes.push({ id: p.id, name: p.name, group: 1, type: "person" });
+        nodes.push({ id: p.id, name: p.name, type: "person", r: 20, color: "#58a6ff" });
         nodeSet.add(p.id);
     });
 
+    // B. AJOUTER LES DOCUMENTS (VERT)
     const docs = data.documents.filter(d => 
         matchByTags(d, state.activeTags) && 
-        matchByTypes(d, state.activeTypes)
+        matchByTypes(d, state.activeTypes) &&
+        matchByQuery(d, state.query, data)
     );
-    
     docs.forEach(d => {
+        // On ajoute le doc seulement s'il est lié à quelqu'un d'affiché, ou si aucun filtre de personne n'est actif
         const relatedPeople = (d.people || []).filter(pid => nodeSet.has(pid));
-        if (relatedPeople.length > 0 || (state.activePerson === "" && people.length > 0)) {
-            const docNodeId = d.id;
-            if(!nodeSet.has(docNodeId)) {
-                nodes.push({ id: docNodeId, name: (d.title.length > 20 ? d.title.substring(0,20)+"..." : d.title), group: 2, type: "doc" });
-                nodeSet.add(docNodeId);
-            }
+        const shouldAdd = state.activePerson === "" || relatedPeople.length > 0;
+
+        if (shouldAdd && !nodeSet.has(d.id)) {
+            nodes.push({ id: d.id, name: (d.title.length > 15 ? d.title.substring(0,15)+"..." : d.title), type: "doc", r: 12, color: "#238636" });
+            nodeSet.add(d.id);
+            
+            // Liens Doc -> Personnes
             (d.people || []).forEach(pid => {
-                if(nodeSet.has(pid)) {
-                    links.push({ source: pid, target: docNodeId });
-                }
+                if(nodeSet.has(pid)) links.push({ source: pid, target: d.id });
+            });
+        }
+    });
+
+    // C. AJOUTER LES ÉVÉNEMENTS (ROUGE)
+    const events = data.events.filter(e => 
+        matchByTags(e, state.activeTags) && 
+        matchByQuery(e, state.query, data)
+    );
+    events.forEach(e => {
+        const relatedPeople = (e.people || []).filter(pid => nodeSet.has(pid));
+        const shouldAdd = state.activePerson === "" || relatedPeople.length > 0;
+
+        if (shouldAdd && !nodeSet.has(e.id)) {
+            nodes.push({ id: e.id, name: fmtDate(e.date), type: "event", r: 15, color: "#f85149" });
+            nodeSet.add(e.id);
+
+            // Liens Event -> Personnes
+            (e.people || []).forEach(pid => {
+                if(nodeSet.has(pid)) links.push({ source: pid, target: e.id });
+            });
+
+            // Liens Event -> Docs (Preuves)
+            (e.related_docs || []).forEach(did => {
+                if(nodeSet.has(did)) links.push({ source: e.id, target: did });
             });
         }
     });
@@ -149,35 +186,38 @@ function renderGraph(root, data, state) {
         return;
     }
 
+    // --- 2. SIMULATION D3 ---
     const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(50)) 
-        .force("charge", d3.forceManyBody().strength(-80)) 
+        .force("link", d3.forceLink(links).id(d => d.id).distance(80)) // Distance entre les noeuds liés
+        .force("charge", d3.forceManyBody().strength(-250)) // Répulsion pour écarter les noeuds
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide().radius(20)); 
+        .force("collide", d3.forceCollide().radius(d => d.r + 5)); // Évite le chevauchement
 
+    // --- 3. RENDU SVG ---
     const svg = d3.select("#graph-container").append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
         .attr("viewBox", [0, 0, width, height]);
 
+    // Groupe pour le zoom
     const g = svg.append("g");
 
     const zoom = d3.zoom()
         .scaleExtent([0.1, 4])
-        .on("zoom", (event) => {
-            g.attr("transform", event.transform);
-        });
+        .on("zoom", (event) => g.attr("transform", event.transform));
 
     svg.call(zoom);
 
+    // Dessiner les liens
     const link = g.append("g")
-        .attr("stroke", "#58a6ff")
-        .attr("stroke-opacity", 0.4)
+        .attr("stroke", "#30363d")
+        .attr("stroke-opacity", 0.6)
         .selectAll("line")
         .data(links)
         .join("line")
         .attr("stroke-width", 1.5);
 
+    // Dessiner les noeuds (Groupes)
     const node = g.append("g")
         .selectAll(".node")
         .data(nodes)
@@ -188,33 +228,66 @@ function renderGraph(root, data, state) {
             .on("drag", dragged)
             .on("end", dragended));
 
+    // Cercles
     node.append("circle")
-        .attr("r", d => d.group === 1 ? 14 : 9)
-        .attr("fill", d => d.group === 1 ? "#1f6feb" : "#238636")
-        .on("click", (event, d) => {
-             event.stopPropagation();
-             if(d.type === "doc") {
-               const btn = document.createElement("button");
-               btn.dataset.openDoc = d.id;
-               root.appendChild(btn); btn.click(); root.removeChild(btn);
-            } else if (d.type === "person") {
-               const btn = document.createElement("button");
-               btn.dataset.openPerson = d.id;
-               root.appendChild(btn); btn.click(); root.removeChild(btn);
-            }
-        });
+        .attr("r", d => d.r)
+        .attr("fill", d => d.color)
+        .attr("stroke", "#0d1117")
+        .attr("stroke-width", 2);
 
+    // Labels (Texte)
     node.append("text")
-        .attr("x", 18)
+        .attr("x", d => d.r + 5)
         .attr("y", 4)
         .text(d => d.name)
-        .clone(true).lower()
-        .attr("stroke", "#000")
-        .attr("stroke-width", 3)
-        .attr("stroke-opacity", 0.8);
+        .style("font-family", "var(--font-mono)")
+        .style("font-size", "10px")
+        .style("fill", "#c9d1d9")
+        .style("pointer-events", "none")
+        .style("text-shadow", "0 1px 2px #000");
 
-    node.append("title").text(d => d.name);
+    // --- 4. INTERACTIONS (HOVER & CLICK) ---
+    
+    // Index des voisins pour le highlight rapide
+    const linkedByIndex = {};
+    links.forEach(d => {
+        linkedByIndex[`${d.source.id},${d.target.id}`] = 1;
+        linkedByIndex[`${d.target.id},${d.source.id}`] = 1;
+    });
+    function isConnected(a, b) {
+        return linkedByIndex[`${a.id},${b.id}`] || linkedByIndex[`${b.id},${a.id}`] || a.id === b.id;
+    }
 
+    // Gestion du Hover (Mode Focus)
+    node.on("mouseover", (event, d) => {
+        node.style("opacity", o => isConnected(d, o) ? 1 : 0.1);
+        link.style("stroke-opacity", o => (o.source === d || o.target === d ? 1 : 0.05));
+        link.style("stroke", o => (o.source === d || o.target === d ? "#fff" : "#30363d"));
+    }).on("mouseout", () => {
+        node.style("opacity", 1);
+        link.style("stroke-opacity", 0.6);
+        link.style("stroke", "#30363d");
+    });
+
+    // Gestion du Clic (Ouverture Modale)
+    node.on("click", (event, d) => {
+        event.stopPropagation();
+        if(d.type === "doc") {
+            const btn = document.createElement("button");
+            btn.dataset.openDoc = d.id;
+            root.appendChild(btn); btn.click(); root.removeChild(btn);
+        } else if (d.type === "person") {
+            const btn = document.createElement("button");
+            btn.dataset.openPerson = d.id;
+            root.appendChild(btn); btn.click(); root.removeChild(btn);
+        } else if (d.type === "event") {
+            const btn = document.createElement("button");
+            btn.dataset.openEvent = d.id;
+            root.appendChild(btn); btn.click(); root.removeChild(btn);
+        }
+    });
+
+    // --- 5. UPDATE LOOP ---
     simulation.on("tick", () => {
         link
             .attr("x1", d => d.source.x)
@@ -241,7 +314,7 @@ function renderGraph(root, data, state) {
     }
 }
 
-// --- UTILITAIRE ICÔNES ---
+// --- UTILITAIRE ICÔNES (Timeline) ---
 function getEventIcon(evt) {
   const text = (evt.title + " " + (evt.tags||[]).join(" ")).toLowerCase();
   if (text.includes("mort") || text.includes("décès") || text.includes("meurtre")) return "💀";
@@ -289,7 +362,6 @@ function renderTimeline(root, data, state){
 
   years.forEach(y => {
     const yearLabel = y === 0 ? "Date Inconnue" : y;
-    
     html += `<div class="timeline-year-separator"><span>${yearLabel}</span></div>`;
     
     byYear.get(y).forEach(e => {
@@ -297,26 +369,15 @@ function renderTimeline(root, data, state){
         const dateStr = e.date ? new Date(e.date).toLocaleDateString("fr-FR", {day:"2-digit", month:"short"}) : "?";
         const approxHtml = e.approx ? `<span title="Date approximative" class="approx-indicator">~</span>` : "";
         const tagsHtml = (e.tags||[]).slice(0,3).map(t=>`<span class="mini-tag">${escapeHtml(t)}</span>`).join("");
-        const proofs = e.related_docs?.length 
-            ? `<div class="proof-badge">📎 ${e.related_docs.length}</div>` 
-            : "";
+        const proofs = e.related_docs?.length ? `<div class="proof-badge">📎 ${e.related_docs.length}</div>` : "";
 
         html += `
         <div class="timeline-row" data-open-event="${escapeHtml(e.id)}">
-            <div class="tl-date">
-                <span class="d-day">${dateStr}</span>
-                ${approxHtml}
-            </div>
-            <div class="tl-marker">
-                <div class="tl-line"></div>
-                <div class="tl-icon">${icon}</div>
-            </div>
+            <div class="tl-date"><span class="d-day">${dateStr}</span>${approxHtml}</div>
+            <div class="tl-marker"><div class="tl-line"></div><div class="tl-icon">${icon}</div></div>
             <div class="tl-content">
                 <div class="tl-card">
-                    <div class="tl-header">
-                        <h4>${escapeHtml(e.title)}</h4>
-                        ${proofs}
-                    </div>
+                    <div class="tl-header"><h4>${escapeHtml(e.title)}</h4>${proofs}</div>
                     <p>${escapeHtml(e.summary || "Aucun détail disponible.")}</p>
                     ${tagsHtml ? `<div class="tl-tags">${tagsHtml}</div>` : ""}
                 </div>
@@ -390,7 +451,7 @@ function renderPeople(root, data, state){
   `;
 }
 
-// MODAL (MODIFIÉE)
+// MODAL
 export function renderModal(modalRoot, payload, data){
   const { kind, id } = payload;
   let title = "Document";
@@ -432,12 +493,9 @@ export function renderModal(modalRoot, payload, data){
       `;
   } else if(kind === "event") {
       const e = data.events.find(x=>x.id===id);
-      
-      // LOGIQUE AJOUTÉE ICI POUR LES PREUVES ET SUJETS
       if(!e) return;
       title = "DÉTAILS DE L'ÉVÉNEMENT";
       
-      // 1. Génération de la liste des sujets avec liens
       const peopleLinks = (e.people || []).map(pid => {
          const p = (data.entities?.people||[]).find(x => x.id === pid);
          if(p) return `<li><a href="#" data-open-person="${escapeHtml(p.id)}" style="color:var(--accent)">${escapeHtml(p.name)}</a> <span style="font-size:0.9em; color:var(--text-muted)">(${p.role})</span></li>`;
@@ -448,7 +506,6 @@ export function renderModal(modalRoot, payload, data){
         ? `<ul style="margin:0; padding-left:20px; line-height:1.6">${peopleLinks}</ul>` 
         : `<div class="value" style="color:var(--text-muted); font-style:italic">Aucun sujet spécifié.</div>`;
 
-      // 2. Génération des cartes de preuves cliquables
       const docsLinks = (e.related_docs || []).map(did => {
          const d = data.documents.find(x => x.id === did);
          if(!d) return "";
