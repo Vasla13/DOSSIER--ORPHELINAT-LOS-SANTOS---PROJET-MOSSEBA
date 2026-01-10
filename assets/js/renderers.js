@@ -101,7 +101,7 @@ export function renderContent(root, data, state){
   return renderTimeline(root, data, state);
 }
 
-// 4. GRAPHE RELATIONNEL (COMPACTÉ)
+// 4. GRAPHE RELATIONNEL
 function renderGraph(root, data, state) {
     if(!window.d3) {
         root.innerHTML = "<div class='kpi' style='color:red'>Erreur : D3.js non chargé.</div>";
@@ -113,7 +113,6 @@ function renderGraph(root, data, state) {
     const width = container.clientWidth;
     const height = container.clientHeight || 800; 
 
-    // 1. Préparer les données (Filtrées)
     const nodes = [];
     const links = [];
     const nodeSet = new Set();
@@ -150,14 +149,12 @@ function renderGraph(root, data, state) {
         return;
     }
 
-    // 2. Simulation D3 (PARAMÈTRES AJUSTÉS POUR ÊTRE PLUS COMPACT)
     const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(50)) // Distance réduite (était 120)
-        .force("charge", d3.forceManyBody().strength(-80)) // Répulsion très réduite (était -400)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(50)) 
+        .force("charge", d3.forceManyBody().strength(-80)) 
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide().radius(20)); // Collision réduite (était 40)
+        .force("collide", d3.forceCollide().radius(20)); 
 
-    // 3. SVG & Zoom
     const svg = d3.select("#graph-container").append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -173,7 +170,6 @@ function renderGraph(root, data, state) {
 
     svg.call(zoom);
 
-    // Liens
     const link = g.append("g")
         .attr("stroke", "#58a6ff")
         .attr("stroke-opacity", 0.4)
@@ -182,7 +178,6 @@ function renderGraph(root, data, state) {
         .join("line")
         .attr("stroke-width", 1.5);
 
-    // Noeuds
     const node = g.append("g")
         .selectAll(".node")
         .data(nodes)
@@ -193,7 +188,6 @@ function renderGraph(root, data, state) {
             .on("drag", dragged)
             .on("end", dragended));
 
-    // Cercles
     node.append("circle")
         .attr("r", d => d.group === 1 ? 14 : 9)
         .attr("fill", d => d.group === 1 ? "#1f6feb" : "#238636")
@@ -210,7 +204,6 @@ function renderGraph(root, data, state) {
             }
         });
 
-    // Labels
     node.append("text")
         .attr("x", 18)
         .attr("y", 4)
@@ -222,7 +215,6 @@ function renderGraph(root, data, state) {
 
     node.append("title").text(d => d.name);
 
-    // Update
     simulation.on("tick", () => {
         link
             .attr("x1", d => d.source.x)
@@ -233,7 +225,6 @@ function renderGraph(root, data, state) {
         node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
 
-    // Drag functions
     function dragstarted(event) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         event.subject.fx = event.subject.x;
@@ -248,6 +239,19 @@ function renderGraph(root, data, state) {
         event.subject.fx = null;
         event.subject.fy = null;
     }
+}
+
+// --- UTILITAIRE ICÔNES ---
+function getEventIcon(evt) {
+  const text = (evt.title + " " + (evt.tags||[]).join(" ")).toLowerCase();
+  if (text.includes("mort") || text.includes("décès") || text.includes("meurtre")) return "💀";
+  if (text.includes("police") || text.includes("lspd") || text.includes("enquête")) return "👮‍♂️";
+  if (text.includes("médical") || text.includes("clinique") || text.includes("sang") || text.includes("dent")) return "⚕️";
+  if (text.includes("argent") || text.includes("vente") || text.includes("compte") || text.includes("déficit")) return "💰";
+  if (text.includes("naissance") || text.includes("enfant") || text.includes("rêve")) return "👶";
+  if (text.includes("note") || text.includes("écrit") || text.includes("lettre")) return "📝";
+  if (text.includes("mosseba") || text.includes("omega")) return "👁️";
+  return "📂";
 }
 
 // 1. TIMELINE VERTICALE
@@ -271,7 +275,7 @@ function renderTimeline(root, data, state){
   const years = [...byYear.keys()].sort((a,b)=> state.sortDir==="asc" ? a-b : b-a);
 
   if(years.length === 0) {
-    root.innerHTML = `<div class="kpi" style="max-width:300px; margin:0 auto">Aucun événement ne correspond à la recherche.</div>`;
+    root.innerHTML = `<div class="kpi" style="max-width:300px; margin:50px auto">Aucun événement ne correspond à la recherche.</div>`;
     return;
   }
 
@@ -280,31 +284,45 @@ function renderTimeline(root, data, state){
       <div class="kpi"><strong>${events.length}</strong><span>Événements</span></div>
       <div class="kpi"><strong>${years.length}</strong><span>Périodes</span></div>
     </div>
-    <div class="timeline-track">
+    <div class="timeline-container">
   `;
 
   years.forEach(y => {
     const yearLabel = y === 0 ? "Date Inconnue" : y;
-    html += `<div class="timeline-year-block">
-               <div class="timeline-year-label">${yearLabel}</div>`;
+    
+    html += `<div class="timeline-year-separator"><span>${yearLabel}</span></div>`;
     
     byYear.get(y).forEach(e => {
-        const approx = e.approx ? `<span class="badge-approx">⚠️ Approx</span>` : "";
-        const tagsHtml = (e.tags||[]).slice(0,3).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("");
-        
+        const icon = getEventIcon(e);
+        const dateStr = e.date ? new Date(e.date).toLocaleDateString("fr-FR", {day:"2-digit", month:"short"}) : "?";
+        const approxHtml = e.approx ? `<span title="Date approximative" class="approx-indicator">~</span>` : "";
+        const tagsHtml = (e.tags||[]).slice(0,3).map(t=>`<span class="mini-tag">${escapeHtml(t)}</span>`).join("");
+        const proofs = e.related_docs?.length 
+            ? `<div class="proof-badge">📎 ${e.related_docs.length}</div>` 
+            : "";
+
         html += `
-        <div class="timeline-event" data-open-event="${escapeHtml(e.id)}">
-            <div class="event-meta">
-                <span style="color:#fff">${escapeHtml(fmtDate(e.date))}</span>
-                ${approx}
-                <span style="margin-left:auto">${e.related_docs?.length ? `📎 ${e.related_docs.length} preuve(s)` : ""}</span>
+        <div class="timeline-row" data-open-event="${escapeHtml(e.id)}">
+            <div class="tl-date">
+                <span class="d-day">${dateStr}</span>
+                ${approxHtml}
             </div>
-            <h4>${escapeHtml(e.title)}</h4>
-            <p>${escapeHtml(e.summary || "Aucun détail disponible.")}</p>
-            ${tagsHtml ? `<div style="margin-top:10px; display:flex; gap:5px">${tagsHtml}</div>` : ""}
+            <div class="tl-marker">
+                <div class="tl-line"></div>
+                <div class="tl-icon">${icon}</div>
+            </div>
+            <div class="tl-content">
+                <div class="tl-card">
+                    <div class="tl-header">
+                        <h4>${escapeHtml(e.title)}</h4>
+                        ${proofs}
+                    </div>
+                    <p>${escapeHtml(e.summary || "Aucun détail disponible.")}</p>
+                    ${tagsHtml ? `<div class="tl-tags">${tagsHtml}</div>` : ""}
+                </div>
+            </div>
         </div>`;
     });
-    html += `</div>`;
   });
   html += `</div>`;
   root.innerHTML = html;
@@ -372,7 +390,7 @@ function renderPeople(root, data, state){
   `;
 }
 
-// MODAL
+// MODAL (MODIFIÉE)
 export function renderModal(modalRoot, payload, data){
   const { kind, id } = payload;
   let title = "Document";
@@ -414,8 +432,63 @@ export function renderModal(modalRoot, payload, data){
       `;
   } else if(kind === "event") {
       const e = data.events.find(x=>x.id===id);
-      title = "ÉVÉNEMENT CHRONOLOGIQUE";
-      body = `<h2 style="margin:0 0 8px 0; color:#fff">${escapeHtml(e.title)}</h2><div style="margin-bottom:24px; color:var(--accent); font-family:var(--font-mono)">${escapeHtml(fmtDate(e.date))}</div><div class="transcription">${escapeHtml(e.summary)}</div>`;
+      
+      // LOGIQUE AJOUTÉE ICI POUR LES PREUVES ET SUJETS
+      if(!e) return;
+      title = "DÉTAILS DE L'ÉVÉNEMENT";
+      
+      // 1. Génération de la liste des sujets avec liens
+      const peopleLinks = (e.people || []).map(pid => {
+         const p = (data.entities?.people||[]).find(x => x.id === pid);
+         if(p) return `<li><a href="#" data-open-person="${escapeHtml(p.id)}" style="color:var(--accent)">${escapeHtml(p.name)}</a> <span style="font-size:0.9em; color:var(--text-muted)">(${p.role})</span></li>`;
+         return `<li>${escapeHtml(pid)}</li>`;
+      }).join("");
+
+      const peopleSection = peopleLinks 
+        ? `<ul style="margin:0; padding-left:20px; line-height:1.6">${peopleLinks}</ul>` 
+        : `<div class="value" style="color:var(--text-muted); font-style:italic">Aucun sujet spécifié.</div>`;
+
+      // 2. Génération des cartes de preuves cliquables
+      const docsLinks = (e.related_docs || []).map(did => {
+         const d = data.documents.find(x => x.id === did);
+         if(!d) return "";
+         return `
+            <div class="doc-card" data-open-doc="${escapeHtml(d.id)}" style="margin-bottom:8px; padding:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); display:flex; align-items:center; gap:10px; cursor:pointer">
+               <div style="font-size:20px">📄</div>
+               <div>
+                  <div style="font-weight:bold; font-size:13px; color:#fff">${escapeHtml(d.title)}</div>
+                  <div style="font-size:11px; color:var(--text-muted)">${escapeHtml(d.type)}</div>
+               </div>
+            </div>
+         `;
+      }).join("");
+
+      const docsSection = docsLinks 
+        ? `<div>${docsLinks}</div>` 
+        : `<div class="value" style="color:var(--text-muted); font-style:italic">Aucune preuve liée.</div>`;
+
+      body = `
+        <h2 style="margin:0 0 5px 0; color:#fff; font-size:20px">${escapeHtml(e.title)}</h2>
+        <div style="margin-bottom:20px; color:var(--accent); font-family:var(--font-mono); font-size:14px">
+            ${escapeHtml(fmtDate(e.date))} ${e.approx ? "<span class='tag'>~ Approx</span>" : ""}
+        </div>
+
+        <div class="detail-block">
+            <span class="label">RÉSUMÉ DES FAITS</span>
+            <div class="transcription">${escapeHtml(e.summary)}</div>
+        </div>
+
+        <div class="grid-details" style="margin-top:24px; border-top:1px solid var(--border); padding-top:20px">
+            <div>
+                <span class="label" style="margin-bottom:12px">👥 SUJETS IMPLIQUÉS</span>
+                ${peopleSection}
+            </div>
+            <div>
+                <span class="label" style="margin-bottom:12px">🔍 PREUVES & DOSSIERS</span>
+                ${docsSection}
+            </div>
+        </div>
+      `;
   }
 
   modalRoot.querySelector("h3").textContent = title;

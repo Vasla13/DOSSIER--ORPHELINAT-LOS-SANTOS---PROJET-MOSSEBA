@@ -100,34 +100,166 @@ main {
 .kpi strong { display: block; font-size: 24px; font-family: var(--font-mono); color: var(--text-main); }
 .kpi span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-/* --- TIMELINE VERTICALE --- */
-.timeline-track { position: relative; padding-left: 20px; max-width: 800px; margin: 0 auto; }
-.timeline-year-block { margin-bottom: 40px; position: relative; }
-.timeline-year-block::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: -40px; width: 2px; background: var(--border);
+/* --- TIMELINE RAFFINÉE --- */
+.timeline-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 50px;
 }
-.timeline-year-label {
-  position: sticky; top: 0; background: var(--bg); display: inline-block;
-  padding: 4px 12px; border: 1px solid var(--border); border-radius: 4px;
-  font-family: var(--font-mono); font-weight: bold; color: var(--accent);
-  margin-bottom: 20px; margin-left: -10px; z-index: 2; box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-}
-.timeline-event {
-  position: relative; margin-left: 24px; margin-bottom: 24px;
-  background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px;
-  cursor: pointer; transition: transform 0.2s, border-color 0.2s;
-}
-.timeline-event:hover { transform: translateX(4px); border-color: var(--text-muted); }
-.timeline-event::after {
-  content: ""; position: absolute; left: -29px; top: 20px; width: 10px; height: 10px;
-  background: var(--bg); border: 2px solid var(--text-muted); border-radius: 50%; z-index: 1;
-}
-.timeline-event:hover::after { background: var(--accent); border-color: var(--accent); }
 
-.event-meta { display: flex; gap: 10px; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-family: var(--font-mono); }
-.badge-approx { color: #d2a85c; border: 1px solid rgba(210,168,92,0.3); padding: 0 4px; border-radius: 4px; font-size: 10px; }
-.timeline-event h4 { margin: 0 0 8px 0; font-size: 17px; color: #fff; }
-.timeline-event p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-main); }
+.timeline-year-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0 20px 0;
+  position: relative;
+}
+.timeline-year-separator::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  z-index: 0;
+}
+.timeline-year-separator span {
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: bold;
+  font-size: 14px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  z-index: 1;
+  box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+}
+
+/* Structure en grille pour chaque événement */
+.timeline-row {
+  display: flex;
+  position: relative;
+  margin-bottom: 20px;
+  cursor: pointer;
+  group: "";
+}
+
+/* 1. Date (Gauche) */
+.tl-date {
+  width: 80px;
+  text-align: right;
+  padding-top: 15px;
+  padding-right: 15px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.d-day { font-size: 13px; font-weight: bold; color: var(--text-main); }
+.approx-indicator { color: #d2a85c; font-size: 16px; line-height: 10px; }
+
+/* 2. Marqueur Central */
+.tl-marker {
+  width: 50px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.tl-line {
+  position: absolute;
+  top: 0; bottom: -20px; /* Connecte au suivant */
+  width: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.timeline-row:last-child .tl-line { display: none; } /* Pas de ligne après le dernier */
+
+.tl-icon {
+  width: 36px; height: 36px;
+  background: #1c2128;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 0 4px var(--bg); /* Espace autour du cercle */
+}
+.timeline-row:hover .tl-icon {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  transform: scale(1.15);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* 3. Carte Contenu (Droite) */
+.tl-content {
+  flex: 1;
+  padding-bottom: 10px;
+}
+
+.tl-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.tl-card::before {
+  /* Petite flèche vers le marqueur */
+  content: ""; position: absolute; left: -6px; top: 18px;
+  width: 10px; height: 10px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+  transition: border-color 0.2s;
+}
+
+.timeline-row:hover .tl-card {
+  transform: translateX(5px);
+  border-color: var(--text-muted);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.timeline-row:hover .tl-card::before {
+  border-color: var(--text-muted);
+}
+
+.tl-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; }
+.tl-header h4 { margin: 0; font-size: 16px; color: #fff; line-height: 1.4; }
+.proof-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.tl-card p { margin: 0 0 10px 0; font-size: 14px; line-height: 1.5; color: var(--text-main); }
+
+.tl-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.mini-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #0d1117;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Responsive Mobile */
+@media (max-width: 600px) {
+  .tl-date { width: 50px; padding-right: 10px; }
+  .d-day { font-size: 11px; }
+  .tl-marker { width: 30px; }
+  .tl-icon { width: 28px; height: 28px; font-size: 14px; }
+  .tl-card { padding: 12px; }
+  .tl-header h4 { font-size: 14px; }
+}
 
 /* --- Documents Grid --- */
 .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
@@ -143,15 +275,15 @@ main {
 .doc-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; transition: 0.3s; }
 .doc-card:hover .doc-thumb img { opacity: 1; transform: scale(1.05); }
 
-/* --- GRAPHE D3 (Corrigé et Amélioré) --- */
+/* --- GRAPHE D3 --- */
 #graph-container {
   width: 100%; height: 100%;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #090c10; /* Fond très sombre */
+  background: #090c10;
   overflow: hidden;
   position: relative;
-  cursor: grab; /* Curseur main pour indiquer qu'on peut bouger le fond */
+  cursor: grab;
 }
 #graph-container:active {
   cursor: grabbing;
@@ -166,9 +298,9 @@ main {
 .node text {
   font-family: var(--font-mono);
   font-size: 11px;
-  fill: #ffffff !important; /* Force le blanc */
-  text-shadow: 0 2px 4px #000000, 0 0 2px #000; /* Ombre noire pour contraste */
-  pointer-events: none; /* Permet de cliquer sur le cercle à travers le texte */
+  fill: #ffffff !important;
+  text-shadow: 0 2px 4px #000000, 0 0 2px #000;
+  pointer-events: none;
   font-weight: 600;
 }
 
@@ -186,7 +318,7 @@ main {
 
 /* Liens (Lignes) */
 line {
-  stroke: #58a6ff; /* Bleu clair par défaut */
+  stroke: #58a6ff;
   stroke-opacity: 0.4;
 }
 
