@@ -1,13 +1,16 @@
-import { renderContent, renderSidebar, renderModal } from "./renderers.js";
-import { state, setState, initFilters } from "./state.js"; // Import corrigé
+import { state, setState, initFilters } from "./state.js";
 import { parseData } from "./utils.js";
 
-// --- Main Init ---
+// Imports des modules découpés
+import { renderSidebar } from "./views/sidebar.js";
+import { renderTimeline } from "./views/timeline.js";
+import { renderDocuments, renderPeople } from "./views/cards.js";
+import { renderGraph } from "./views/graph.js";
+import { renderModal } from "./views/modal.js";
+
 async function init() {
   try {
-    // 1. Chargement des données
     let rawData = null;
-
     if (window.TIMELINE_DATA) {
         rawData = window.TIMELINE_DATA;
     } else if (typeof timelineData !== "undefined") {
@@ -24,14 +27,8 @@ async function init() {
     }
 
     const data = parseData(rawData);
-    
-    // 2. Initialisation des filtres (Tags, Types, Personnes)
     initFilters(data); 
-
-    // 3. Premier Rendu
     render(data);
-
-    // 4. Activation des événements
     wireEvents(data);
 
   } catch (err) {
@@ -39,30 +36,38 @@ async function init() {
   }
 }
 
-// --- Render Loop ---
+// Routeur d'affichage simple
+function renderContent(root, data, state) {
+    switch(state.view) {
+        case "documents": return renderDocuments(root, data, state);
+        case "people": return renderPeople(root, data, state);
+        case "graph": return renderGraph(root, data, state);
+        default: return renderTimeline(root, data, state);
+    }
+}
+
+// Fonction de rendu principal
 function render(data) {
   const sidebarRoot = document.getElementById("sidebar");
-  const contentRoot = document.getElementById("content");
-
-  // Rendu Sidebar
   if (sidebarRoot) {
       renderSidebar(sidebarRoot, data, state);
-      wireSidebar(data); 
+      // On ré-attache les événements de la sidebar à chaque rendu car le HTML est régénéré
+      wireSidebarEvents(data);
   }
 
-  // Rendu Contenu
+  const contentRoot = document.getElementById("content");
   contentRoot.innerHTML = ""; 
   renderContent(contentRoot, data, state);
 
-  // Boutons Nav
+  // Mise à jour visuelle des onglets de navigation
   document.querySelectorAll(".nav button").forEach(btn => {
     btn.setAttribute("aria-current", btn.dataset.view === state.view ? "page" : "false");
   });
 }
 
-// --- Events Globaux ---
+// Gestionnaires d'événements globaux (Navigation, Modale, Clics)
 function wireEvents(data) {
-  // Navigation
+  // Navigation (Top bar)
   document.querySelectorAll(".nav button").forEach(btn => {
     btn.addEventListener("click", () => {
       setState({ view: btn.dataset.view });
@@ -70,94 +75,100 @@ function wireEvents(data) {
     });
   });
 
-  // Modal
-  document.querySelector(".modal .close").addEventListener("click", closeModal);
-  document.getElementById("modalBackdrop").addEventListener("click", (e) => {
-    if(e.target.id === "modalBackdrop") closeModal();
+  // Délégation d'événements pour les clics "Ouvrir..." (Cards, Timeline rows, Graph nodes)
+  // Cela permet de gérer les éléments créés dynamiquement sans rattacher d'écouteurs partout
+  document.addEventListener("click", (e) => {
+      const docBtn = e.target.closest("[data-open-doc]");
+      const evtBtn = e.target.closest("[data-open-event]");
+      const pplBtn = e.target.closest("[data-open-person]");
+      
+      // Gestion fermeture modale
+      const closeBtn = e.target.closest(".close");
+      const backdrop = e.target.id === "modalBackdrop";
+
+      if(docBtn) {
+          e.preventDefault();
+          openModal("doc", docBtn.dataset.openDoc, data);
+      }
+      else if(evtBtn) {
+          e.preventDefault();
+          openModal("event", evtBtn.dataset.openEvent, data);
+      }
+      else if(pplBtn) {
+          e.preventDefault();
+          openModal("person", pplBtn.dataset.openPerson, data);
+      }
+      else if(closeBtn || backdrop) {
+          closeModal();
+      }
   });
-  document.addEventListener("keydown", (e)=>{
+
+  // Touche Echap pour fermer la modale
+  document.addEventListener("keydown", (e) => {
       if(e.key === "Escape") closeModal();
   });
-
-  // Clics sur les cartes (Documents, Events, People)
-  document.getElementById("content").addEventListener("click", (e) => {
-    handleOpenClick(e, data);
-  });
-  
-  // Clics dans la modale (liens internes)
-  document.querySelector(".modal").addEventListener("click", (e) => {
-    handleOpenClick(e, data);
-  });
 }
 
-function handleOpenClick(e, data){
-    const docBtn = e.target.closest("[data-open-doc]");
-    const evtBtn = e.target.closest("[data-open-event]");
-    const pplBtn = e.target.closest("[data-open-person]");
+// Gestionnaires spécifiques à la Sidebar (Inputs générés dynamiquement)
+function wireSidebarEvents(data) {
+    // Recherche
+    const qInput = document.getElementById("q");
+    if(qInput) {
+        qInput.addEventListener("input", (e) => {
+            setState({ query: e.target.value });
+            render(data);
+            // On remet le focus car le render() a recréé l'input
+            const newInp = document.getElementById("q");
+            if(newInp) {
+                newInp.focus();
+                newInp.setSelectionRange(newInp.value.length, newInp.value.length);
+            }
+        });
+    }
 
-    if(docBtn) openModal("doc", docBtn.dataset.openDoc, data);
-    else if(evtBtn) openModal("event", evtBtn.dataset.openEvent, data);
-    else if(pplBtn) openModal("person", pplBtn.dataset.openPerson, data);
-}
-
-// --- Events Sidebar ---
-function wireSidebar(data) {
-  // Recherche
-  const qInput = document.getElementById("q");
-  if(qInput){
-      qInput.addEventListener("input", (e) => {
-        setState({ query: e.target.value });
-        render(data); 
-        const newInp = document.getElementById("q");
-        if(newInp) {
-            newInp.focus();
-            newInp.setSelectionRange(newInp.value.length, newInp.value.length);
-        }
-      });
-  }
-
-  // Chips (Tags & Types)
-  document.querySelectorAll(".chip").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tag = btn.dataset.chip;
-      if(btn.classList.contains("chip-type")) {
-         const newTypes = new Set(state.activeTypes);
-         if(newTypes.has(tag)) newTypes.delete(tag);
-         else newTypes.add(tag);
-         setState({ activeTypes: newTypes });
-      } else {
-         const newTags = new Set(state.activeTags);
-         if(newTags.has(tag)) newTags.delete(tag);
-         else newTags.add(tag);
-         setState({ activeTags: newTags });
-      }
-      render(data);
+    // Chips (Tags & Types)
+    document.querySelectorAll(".chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const tag = btn.dataset.chip;
+          if(btn.classList.contains("chip-type")) {
+             const newTypes = new Set(state.activeTypes);
+             if(newTypes.has(tag)) newTypes.delete(tag);
+             else newTypes.add(tag);
+             setState({ activeTypes: newTypes });
+          } else {
+             const newTags = new Set(state.activeTags);
+             if(newTags.has(tag)) newTags.delete(tag);
+             else newTags.add(tag);
+             setState({ activeTags: newTags });
+          }
+          render(data);
+        });
     });
-  });
 
-  // Select Personne
-  const pSelect = document.getElementById("person");
-  if(pSelect){
-      pSelect.addEventListener("change", (e) => {
-        setState({ activePerson: e.target.value });
-        render(data);
-      });
-  }
+    // Select Personne
+    const pSelect = document.getElementById("person");
+    if(pSelect){
+        pSelect.addEventListener("change", (e) => {
+            setState({ activePerson: e.target.value });
+            render(data);
+        });
+    }
   
-  // Select Tri
-  const sSelect = document.getElementById("sortDir");
-  if(sSelect){
-      sSelect.addEventListener("change", (e) => {
-        setState({ sortDir: e.target.value });
-        render(data);
-      });
-  }
+    // Select Tri
+    const sSelect = document.getElementById("sortDir");
+    if(sSelect){
+        sSelect.addEventListener("change", (e) => {
+            setState({ sortDir: e.target.value });
+            render(data);
+        });
+    }
 }
 
-// --- Modal ---
+// Fonctions Modale
 function openModal(kind, id, data) {
   const backdrop = document.getElementById("modalBackdrop");
-  renderModal(document.getElementById("modal"), { kind, id }, data);
+  const modal = document.getElementById("modal");
+  renderModal(modal, { kind, id }, data);
   backdrop.classList.add("open");
 }
 
