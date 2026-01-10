@@ -1,26 +1,35 @@
 import { uniq } from "./utils.js";
 
-export function initState(data){
-  const allTags = uniq([
+// L'état global de l'application
+export const state = {
+  view: "timeline",      // timeline | documents | people | graph
+  query: "",
+  activeTags: new Set(),
+  activeTypes: new Set(),
+  activePerson: "",      // ID de la personne sélectionnée
+  sortDir: "asc",        // asc | desc
+  
+  // Listes pour les menus déroulants (remplies via initFilters)
+  allTags: [],
+  allTypes: [],
+  allPeople: []
+};
+
+// Fonction simple pour mettre à jour l'état
+export function setState(changes) {
+  Object.assign(state, changes);
+}
+
+// Fonction pour initialiser les filtres (tags, types...) à partir des données chargées
+export function initFilters(data) {
+  state.allTags = uniq([
     ...data.events.flatMap(e => e.tags || []),
     ...data.documents.flatMap(d => d.tags || [])
   ]).sort((a,b)=>a.localeCompare(b,"fr"));
 
-  const allTypes = uniq([
+  state.allTypes = uniq([
     ...data.documents.map(d => d.type).filter(Boolean)
   ]).sort((a,b)=>a.localeCompare(b,"fr"));
 
-  const allPeople = (data.entities?.people || []).slice().sort((a,b)=>a.name.localeCompare(b.name,"fr"));
-
-  return {
-    view: "timeline",      // timeline | documents | people
-    query: "",
-    activeTags: new Set(),
-    activeTypes: new Set(),
-    activePerson: null,
-    sortDir: "asc",
-    allTags,
-    allTypes,
-    allPeople
-  };
+  state.allPeople = (data.entities?.people || []).slice().sort((a,b)=>a.name.localeCompare(b.name,"fr"));
 }

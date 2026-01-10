@@ -9,7 +9,7 @@ export function escapeHtml(str=""){
 
 export function fmtDate(iso){
   if(!iso) return "Date inconnue";
-  // ISO may be "YYYY-MM-DD"
+  // ISO format YYYY-MM-DD
   const d = new Date(iso+"T00:00:00");
   if(Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString("fr-FR", {year:"numeric", month:"short", day:"2-digit"});
@@ -27,4 +27,29 @@ export function uniq(arr){
 
 export function contains(haystack, needle){
   return String(haystack||"").toLowerCase().includes(String(needle||"").toLowerCase());
+}
+
+/* --- FONCTION AJOUTÉE POUR CORRIGER L'ERREUR --- */
+export function parseData(source) {
+    // Si aucune source n'est passée, on renvoie une structure vide pour éviter les crashs
+    if(!source) {
+        return { 
+            meta: {}, 
+            entities: { people:[], orgs:[], places:[] }, 
+            documents: [], 
+            events: [] 
+        };
+    }
+
+    // On s'assure que la structure est complète
+    return {
+        meta: source.meta || {},
+        entities: {
+            people: source.entities?.people || [],
+            orgs: source.entities?.orgs || [],
+            places: source.entities?.places || []
+        },
+        documents: source.documents || [],
+        events: source.events || []
+    };
 }
