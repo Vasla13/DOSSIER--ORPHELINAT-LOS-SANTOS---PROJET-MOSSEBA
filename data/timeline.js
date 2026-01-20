@@ -3,7 +3,7 @@
 window.TIMELINE_DATA = {
   meta: {
     title: "DOSSIER MOSSEBA — Archives OMEGA",
-    generated_at: "2026-01-10 14:00",
+    generated_at: "2026-01-19 15:45",
     notes: [
       "Timeline reconstituée à partir des archives récupérées.",
       "Certaines dates sont approximatives (marquées ~)."
@@ -185,6 +185,20 @@ window.TIMELINE_DATA = {
       transcription: "N'oubliez pas d'administrer leur perfusion de nitroglycérine aux patients qui passeront au bloc cette nuit.",
       images: ["assets/img/5632c9a7-4e07-4802-8e11-f39a8d412d45.png"]
     },
+    /* --- NOUVEAU DOCUMENT AJOUTÉ ICI --- */
+    {
+      id: "doc_note_faute",
+      date: "2024-02-15", 
+      type: "Note Manuscrite",
+      title: "Note : 'Ce n'était pas ma faute'",
+      summary: "Écrit obsessionnel d'un patient se plaignant des cris d'un 'petit'. Mentionne le Docteur. Menace explicite de 'le faire taire de nouveau'.",
+      tags: ["psychose", "violence", "danger"],
+      people: ["p_sanders"], 
+      transcription: "Je vais devoir le faire taire de nouveau... Tais-toi TAIS TOI...",
+      approx: true,
+      images: ["assets/img/image_14fb47.jpg"]
+    },
+    /* ----------------------------------- */
     {
       id: "doc_radio_dents",
       date: "2025-01-01", 
@@ -328,6 +342,17 @@ window.TIMELINE_DATA = {
       related_docs: ["doc_sienna_exam"],
       approx: true
     },
+    /* --- NOUVEL ÉVÉNEMENT AJOUTÉ ICI --- */
+    {
+      id: "evt_incident_nuit",
+      date: "2024-02-15",
+      title: "Incident Nocturne",
+      summary: "Un résident exprime des pulsions meurtrières envers un enfant bruyant. Le Dr Sanders impose des excuses, mais l'état du patient se dégrade.",
+      type: "incident",
+      related_docs: ["doc_note_faute"],
+      approx: true
+    },
+    /* ----------------------------------- */
     {
       id: "evt_2024_v2",
       date: "2024-06-01",
