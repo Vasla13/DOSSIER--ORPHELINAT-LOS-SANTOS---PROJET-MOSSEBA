@@ -14,6 +14,9 @@ Si ton navigateur bloque certains chargements en local, lance un petit serveur:
 - `assets/js/*` : rendu + filtres + modal
 - `assets/css/style.css` : style
 - `assets/img/*` : toutes les images (renommées en safe names)
+- `assets/img/thumbs/*` : miniatures compressées pour la grille des preuves
+- `assets/vendor/d3.v7.min.js` : dépendance locale pour la vue Relations
+- `scripts/generate_thumbnails.py` : régénère les miniatures si tu ajoutes des images
 
 ## Modifier la timeline
 Édite `data/timeline.js` :

@@ -16,7 +16,7 @@ export function getRichDescription(item) {
         <p>Toute personne ou structure liée est considérée compromise.</p>
       </div>
       <h3>CŒUR DU SITE</h3>
-      <p>Projet expérimental initié par Thomas Levy. Ne cherche pas à simuler la vie, mais à faire fonctionner l'existence elle-même.</p>
+      <p>Projet expérimental centré sur la continuité de l'identité et de la conscience hors support biologique.</p>
       <ul class="lore-list">
         <li><strong>Objectif :</strong> Reconstruire, maintenir et exploiter l'identité humaine sous forme numérique.</li>
         <li><strong>Méthode :</strong> Utilisation de résidus mémoriels (voix, souvenirs, émotions, schémas cognitifs).</li>
@@ -28,13 +28,13 @@ export function getRichDescription(item) {
   // 2. THOMAS LEVY
   if (t.includes("levy") || t.includes("thomas")) {
     return `
-      <h3>ARCHITECTE IDÉOLOGIQUE</h3>
-      <p>Fondateur et initiateur du projet. Travaille hors cadre légal.</p>
+      <h3>NOM ASSOCIÉ AU DOSSIER</h3>
+      <p>Le nom Levy revient dans les archives CCTV et dans plusieurs recoupements autour de MOSSEBA, sans que chaque document l'affiche explicitement.</p>
       <ul class="lore-list">
-        <li><strong>Vision :</strong> La mémoire et l'identité ne sont pas sacrées, mais des ressources exploitables.</li>
-        <li><strong>Empreinte :</strong> Lié aux systèmes de surveillance (CCTV). Son concept perdure même après son retrait.</li>
+        <li><strong>Empreinte :</strong> Relié aux systèmes de surveillance (CCTV).</li>
+        <li><strong>Statut :</strong> Son rôle exact doit être reconstitué à partir de plusieurs pièces plutôt qu'à partir d'une seule preuve.</li>
       </ul>
-      <p class="lore-note">👉 Levy est l'origine intellectuelle du projet, même quand il n'est plus visible.</p>
+      <p class="lore-note">👉 Levy reste une figure probable du dossier, mais l'intensité de son implication varie selon les sources.</p>
     `;
   }
 
@@ -164,8 +164,8 @@ export function getRichDescription(item) {
   if (t.includes("cannibalisme") || t.includes("chair") || t.includes("dents")) {
     return `
       <h3>DÉRIVE EXTRÊME</h3>
-      <p>Cas médicaux liés à la consommation de chair humaine. Marques gravées sur les dents (ritualisation).</p>
-      <p class="lore-note">👉 Montre que le projet a généré des comportements "hors-humanité".</p>
+      <p>Les éléments lisibles confirment surtout la mention de chair humaine et un visuel intitulé "Dents de cannibale".</p>
+      <p class="lore-note">👉 Le dossier suggère une dérive très grave, mais certains détails dentaires restent d'abord visuels et non textuels.</p>
     `;
   }
 
@@ -191,7 +191,7 @@ export function getRichDescription(item) {
       </div>
       <h3>1. ORIGINE & BUT</h3>
       <ul class="lore-list">
-        <li><strong>Origine :</strong> Projet lancé par Thomas Levy à Los Santos.</li>
+        <li><strong>Origine :</strong> Projet développé à Los Santos sans autorisation gouvernementale formelle clairement affichée.</li>
         <li><strong>But :</strong> Créer une IA auto-évolutive pour maintenir une continuité de conscience.</li>
         <li><strong>Méthode :</strong> Exploitation de résidus mémoriels récoltés sur des sujets.</li>
       </ul>
@@ -203,7 +203,7 @@ export function getRichDescription(item) {
       <h3>ACTE DE VENTE (13/06/2023)</h3>
       <ul class="lore-list">
         <li><strong>Vendeur :</strong> Georges Samson (Directeur Orphelinat).</li>
-        <li><strong>Acheteur :</strong> Anton Sanders (Psychiatre, Glasgow).</li>
+        <li><strong>Acheteur :</strong> Anton Sanders.</li>
         <li><strong>Dates clés :</strong> Signé le 13/06/2023, Prise d'effet le 10/08/2023.</li>
       </ul>
       <p class="lore-note">👉 Marque la prise de contrôle légale de l'établissement par Sanders.</p>

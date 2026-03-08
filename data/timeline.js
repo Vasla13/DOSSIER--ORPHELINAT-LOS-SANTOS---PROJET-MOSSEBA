@@ -41,7 +41,7 @@ window.TIMELINE_DATA = {
         id: "p_ethan",
         name: "Ethan",
         role: "Orphelin",
-        summary: "Enfant obsédé par l'idée de 'quitter cet endroit' dès 2008. Auteur de la rédaction 'Mon Rêve' et de dessins prophétiques."
+        summary: "Enfant dont les écrits de 2008 tournent autour d'une seule obsession : quitter l'orphelinat."
       },
       {
         id: "p_henri",
@@ -52,8 +52,8 @@ window.TIMELINE_DATA = {
       {
         id: "p_levy",
         name: "Thomas Levy",
-        role: "Initiateur Projet MOSSEBA",
-        summary: "Mentionné dans les dossiers fédéraux de 2028 comme créateur de l'IA auto-évolutive. Nom lié au réseau CCTV."
+        role: "Nom associé à MOSSEBA",
+        summary: "Le nom Levy apparaît dans l'archive CCTV. Son rôle exact dans MOSSEBA reste reconstruit à partir de recoupements du dossier."
       },
       {
         id: "p_perington",
@@ -95,18 +95,19 @@ window.TIMELINE_DATA = {
       id: "doc_sienna_exam",
       date: "2034-01-01",
       type: "Dossier Personnel",
-      title: "EXAM FINAL — Sienna Cameron",
-      summary: "Fiche récapitulative étrange : Naissance 2005, LSPD 2023, Mort 2034.",
+      title: "Examen final - Sienna Cameron",
+      summary: "Document d'examen mentionnant Sienna Cameron, sa naissance en 2005, son entrée au LSPD en 2023 et sa mort en 2034.",
       tags: ["biographie", "décès", "mystère"],
       people: ["p_sienna"],
+      approx: true,
       images: ["assets/img/sienna-exam-zoom.png"]
     },
     {
       id: "doc_2006_reve",
-      date: "2006-06-01",
-      type: "Dessin d'enfant",
-      title: "Rêve pour le futur (Anonyme)",
-      summary: "Enfant voulant devenir policier pour protéger les autres et gagner des médailles. Mentionne 'Il y a 2 ans'.",
+      date: "2010-06-01",
+      type: "Rédaction",
+      title: "Rédaction anonyme : 'Rêve pour le futur'",
+      summary: "Texte d'enfant évoquant une rédaction demandée deux ans plus tôt. L'auteur dit vouloir devenir policier pour protéger les autres et aider les nouveaux arrivants.",
       tags: ["enfance", "police"],
       approx: true,
       images: ["assets/img/c165fd09-bac6-486b-9b10-535d44949fd2.png"]
@@ -148,7 +149,7 @@ window.TIMELINE_DATA = {
       date: "2023-06-13",
       type: "Contrat Juridique",
       title: "Acte de Vente Orphelinat",
-      summary: "Vente de Georges Samson à Anton Sanders (Psychiatre). Prise d'effet le 10 août 2023.",
+      summary: "Vente de Georges Samson à Anton Sanders. Prise d'effet le 10 août 2023.",
       tags: ["juridique", "propriété"],
       people: ["p_samson", "p_sanders"],
       images: ["assets/img/f1a3a790-5e18-4035-9b79-be956e063b2a.png", "assets/img/acte-vente-header-zoom.png"]
@@ -157,7 +158,7 @@ window.TIMELINE_DATA = {
       id: "doc_xt_v2",
       date: "2024-06-15",
       type: "Rapport Clinique",
-      title: "Rapport Essai XT Plasma V2é",
+      title: "Rapport d'essai clinique - XT Plasma V2",
       summary: "Rapport signé Sanders. V1: Mort cérébrale. V2: Dissociation mais stable pour les borderline. Prépare la V3.",
       tags: ["médical", "expérimental", "danger"],
       people: ["p_sanders"],
@@ -169,9 +170,9 @@ window.TIMELINE_DATA = {
       date: "2024-10-26",
       type: "Dossier Médical",
       title: "Suivi Clinique : Marcia Wilson",
-      summary: "Patient borderline. Protocole XT Plasma. Évolution de la tension et coma le 26/10.",
+      summary: "Fiche de suivi de Marcia Wilson : trouble borderline, protocole XT Plasma, montée de tension jusqu'à 17/3, perte de conscience et transfert au bloc le 26/10.",
       tags: ["médical", "xt-plasma"],
-      people: ["p_marcia", "p_sanders"],
+      people: ["p_marcia"],
       images: ["assets/img/patient-marcia-zoom.png", "assets/img/patient-marcia-table-zoom.png"]
     },
     {
@@ -185,27 +186,24 @@ window.TIMELINE_DATA = {
       transcription: "N'oubliez pas d'administrer leur perfusion de nitroglycérine aux patients qui passeront au bloc cette nuit.",
       images: ["assets/img/5632c9a7-4e07-4802-8e11-f39a8d412d45.png"]
     },
-    /* --- NOUVEAU DOCUMENT AJOUTÉ ICI --- */
     {
       id: "doc_note_faute",
       date: "2024-02-15", 
       type: "Note Manuscrite",
       title: "Note : 'Ce n'était pas ma faute'",
-      summary: "Écrit obsessionnel d'un patient se plaignant des cris d'un 'petit'. Mentionne le Docteur. Menace explicite de 'le faire taire de nouveau'.",
+      summary: "Écrit obsessionnel autour d'un 'petit' qui crie, d'un docteur et de la formule 'ce n'était pas ma faute'. Menace explicite de 'le faire taire de nouveau'.",
       tags: ["psychose", "violence", "danger"],
-      people: ["p_sanders"], 
       transcription: "Je vais devoir le faire taire de nouveau... Tais-toi TAIS TOI...",
       approx: true,
       images: ["assets/img/image_14fb47.jpg"]
     },
-    /* ----------------------------------- */
     {
       id: "doc_radio_dents",
       date: "2025-01-01", 
       type: "Radiographie",
       title: "Planche Radio & Cannibalisme",
-      summary: "Patient avec rage de dents due à un 'régime de chair humaine'. Marques gravées sur les dents.",
-      tags: ["horreur", "cannibalisme", "rituel"],
+      summary: "Une note associée à la radiographie évoque une rage de dents liée à un régime de chair humaine. Un second visuel est titré 'Dents de cannibale'.",
+      tags: ["horreur", "cannibalisme"],
       approx: true,
       images: ["assets/img/radio-note-zoom.png", "assets/img/e348fe90-a1c3-427c-a29f-2ea81f18bf21.png"]
     },
@@ -225,9 +223,9 @@ window.TIMELINE_DATA = {
       date: "2028-01-15",
       type: "Dossier Fédéral",
       title: "Origine du Projet MOSSEBA",
-      summary: "Initié par Thomas Levy. But : Continuité de la conscience post-mortem via IA. Structure non enregistrée.",
+      summary: "Dossier fédéral décrivant MOSSEBA comme une tentative de continuité fonctionnelle de la conscience humaine hors support biologique, sans autorisation formelle.",
       tags: ["gouvernement", "IA", "mosseba"],
-      people: ["p_levy"],
+      approx: true,
       images: ["assets/img/af1bf6c6-dba5-4787-a62d-3de00452cebe.png"]
     },
     {
@@ -235,8 +233,9 @@ window.TIMELINE_DATA = {
       date: "2028-02-20",
       type: "Dossier Fédéral",
       title: "Évaluation Gouvernementale",
-      summary: "Projet jugé 'Hors Contrôle'. Menace existentielle maximale. Infrastructure compromise.",
+      summary: "Évaluation gouvernementale concluant à une menace existentielle maximale et à une infrastructure compromise.",
       tags: ["gouvernement", "danger", "classifié"],
+      approx: true,
       images: ["assets/img/250fdf52-d5a9-4160-a6a5-b051f11ea24a.png"]
     },
     {
@@ -244,10 +243,10 @@ window.TIMELINE_DATA = {
       date: "2030-01-01", 
       type: "Lettre Manuscrite",
       title: "Lettre à Sienna (Cellule)",
-      summary: "Lettre cryptique envoyée depuis une cellule. Contient des codes : Voix 7421, Yeux 3604...",
+      summary: "Lettre cryptique adressée à Sienna, associant voix, yeux, mains et vue à des nombres écrits en toutes lettres.",
       tags: ["cryptique", "codes"],
       people: ["p_sienna"],
-      transcription: "Ta voix : 7421 | Tes yeux : 3604 | Tes mains : 1957 | Ta vue : 8203",
+      transcription: "Ta voix : sept mille quatre cent vingt et un | Tes yeux : trois mille six cent quatre | Tes mains : mille neuf cent cinquante-sept | Ta vue : huit mille deux cents trois",
       approx: true,
       images: ["assets/img/d74bc3c8-6fe2-43bf-ac89-be6f68e9de82.png"]
     },
@@ -256,7 +255,7 @@ window.TIMELINE_DATA = {
       date: "2025-06-01",
       type: "Surveillance",
       title: "Interface CCTV - Lévy",
-      summary: "Capture d'écran d'un système CCTV mentionnant 'Kela mishpahat Lévy'.",
+      summary: "Capture CCTV mentionnant 'Kela mishpahat Levy'.",
       tags: ["surveillance", "technologie"],
       people: ["p_levy"],
       approx: true,
@@ -267,7 +266,7 @@ window.TIMELINE_DATA = {
       date: "2025-06-01",
       type: "Surveillance",
       title: "Vue Caméra 001",
-      summary: "Vue d'une cellule glauque à 05:20.",
+      summary: "Capture CCTV horodatée 05:20 sur CAM001.",
       tags: ["surveillance", "horreur"],
       approx: true,
       images: ["assets/img/6c57ae0e-9ae9-4507-896a-a30397a5a065.png"]
@@ -307,9 +306,8 @@ window.TIMELINE_DATA = {
       id: "evt_2010_reve",
       date: "2010-06-01",
       title: "Vocation Policière",
-      summary: "Un enfant (probablement Ethan) exprime le souhait de devenir policier pour protéger les autres, contrairement aux adultes de l'orphelinat.",
+      summary: "Une rédaction anonyme évoque une vocation policière destinée à protéger les autres et aider les nouveaux arrivants.",
       type: "témoignage",
-      people: ["p_ethan"],
       related_docs: ["doc_2006_reve"],
       approx: true
     },
@@ -327,7 +325,7 @@ window.TIMELINE_DATA = {
       id: "evt_2023_vente",
       date: "2023-06-13",
       title: "Rachat par le Dr. Sanders",
-      summary: "Georges Samson vend l'orphelinat au psychiatre Anton Sanders. Prise d'effet officielle en août.",
+      summary: "Georges Samson vend l'orphelinat à Anton Sanders. Prise d'effet officielle en août 2023.",
       type: "juridique",
       people: ["p_samson", "p_sanders"],
       related_docs: ["doc_vente_2023"]
@@ -342,22 +340,20 @@ window.TIMELINE_DATA = {
       related_docs: ["doc_sienna_exam"],
       approx: true
     },
-    /* --- NOUVEL ÉVÉNEMENT AJOUTÉ ICI --- */
     {
       id: "evt_incident_nuit",
       date: "2024-02-15",
       title: "Incident Nocturne",
-      summary: "Un résident exprime des pulsions meurtrières envers un enfant bruyant. Le Dr Sanders impose des excuses, mais l'état du patient se dégrade.",
+      summary: "Un résident se dit forcé de s'excuser par un docteur, puis menace de faire taire de nouveau un 'petit' trop bruyant.",
       type: "incident",
       related_docs: ["doc_note_faute"],
       approx: true
     },
-    /* ----------------------------------- */
     {
       id: "evt_2024_v2",
-      date: "2024-06-01",
+      date: "2024-06-15",
       title: "Clôture Essai XT Plasma V2",
-      summary: "Sanders valide la V2 malgré les décès. Note que les patients borderline résistent mieux à la dissociation.",
+      summary: "Le rapport XT Plasma V2 décrit une version plus stable que la première, mais encore marquée par la dissociation. La V3 doit viser la stabilisation.",
       type: "médical",
       people: ["p_sanders"],
       related_docs: ["doc_xt_v2"],
@@ -369,7 +365,7 @@ window.TIMELINE_DATA = {
       title: "Début du Protocole Marcia",
       summary: "Marcia Wilson (Borderline) commence le suivi. Tension 12/6. Sous Aripiprazole.",
       type: "médical",
-      people: ["p_marcia", "p_sanders"],
+      people: ["p_marcia"],
       related_docs: ["doc_marcia_suivi"]
     },
     {
@@ -395,7 +391,7 @@ window.TIMELINE_DATA = {
       id: "evt_cannibalisme",
       date: "2025-01-01", 
       title: "Découvertes Macabres",
-      summary: "Preuves de cannibalisme et de rituels (dents gravées) au sein de l'établissement. Cas Henri Kimmer ('Voix volée').",
+      summary: "Une radiographie évoque un régime de chair humaine, tandis que le dossier Henri Kimmer ajoute le motif de la 'voix' volée.",
       type: "enquête",
       people: ["p_henri"],
       related_docs: ["doc_radio_dents", "doc_henri_kimmer"],
@@ -406,17 +402,17 @@ window.TIMELINE_DATA = {
       id: "evt_2028_mosseba",
       date: "2028-02-20",
       title: "Classification du Projet MOSSEBA",
-      summary: "Le gouvernement classe le dossier. Le projet de Thomas Levy (conscience numérique) est déclaré 'Menace Existentielle'.",
+      summary: "Le gouvernement classe MOSSEBA comme menace existentielle maximale et considère l'infrastructure comme compromise.",
       type: "gouvernement",
-      people: ["p_levy"],
       related_docs: ["doc_mosseba_origin", "doc_mosseba_eval"],
-      tags: ["IA", "apocalypse"]
+      tags: ["IA", "danger"],
+      approx: true
     },
     {
       id: "evt_codes",
       date: "2030-06-15",
       title: "Contact Cellulaire",
-      summary: "Sienna reçoit une lettre cryptique avec des codes biométriques (Voix, Yeux, Mains).",
+      summary: "Sienna reçoit une lettre cryptique reliant voix, yeux, mains et vue à des valeurs numériques rédigées en toutes lettres.",
       type: "mystère",
       people: ["p_sienna"],
       related_docs: ["doc_lettre_codes"],

@@ -2,12 +2,13 @@ import { uniq } from "./utils.js";
 
 // L'état global de l'application
 export const state = {
-  view: "timeline",      // timeline | documents | people | graph
+  view: "timeline",      // overview | timeline | documents | people | graph
   query: "",
   activeTags: new Set(),
   activeTypes: new Set(),
   activePerson: "",      // ID de la personne sélectionnée
   sortDir: "asc",        // asc | desc
+  mobileFiltersOpen: false,
   
   // Listes pour les menus déroulants (remplies via initFilters)
   allTags: [],

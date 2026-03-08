@@ -4,14 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DOSSIER MOSSEBA — Archives Sécurisées</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="assets/css/style.css" />
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="assets/vendor/d3.v7.min.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -25,12 +20,25 @@
           </div>
         </div>
 
-        <nav class="nav" aria-label="Navigation">
-          <button data-view="timeline" aria-current="page">Timeline</button>
-          <button data-view="documents" aria-current="false">Preuves</button>
-          <button data-view="people" aria-current="false">Sujets</button>
-          <button data-view="graph" aria-current="false">Relations</button> 
-        </nav>
+        <div class="header-actions">
+          <nav class="nav" aria-label="Navigation">
+            <button data-view="overview" aria-current="false" type="button">Synthèse</button>
+            <button data-view="timeline" aria-current="page" type="button">Timeline</button>
+            <button data-view="documents" aria-current="false" type="button">Preuves</button>
+            <button data-view="people" aria-current="false" type="button">Sujets</button>
+            <button data-view="graph" aria-current="false" type="button">Relations</button>
+          </nav>
+
+          <button
+            class="mobile-filter-toggle"
+            id="mobileFiltersToggle"
+            type="button"
+            aria-controls="sidebar"
+            aria-expanded="false"
+          >
+            Filtres
+          </button>
+        </div>
       </div>
     </header>
 
@@ -38,9 +46,11 @@
       <aside class="panel sidebar" id="sidebar"></aside>
 
       <section class="panel content-area" id="content">
-        </section>
+      </section>
     </main>
   </div>
+
+  <div class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop"></div>
 
   <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
     <div class="modal" id="modal">

@@ -1,5 +1,5 @@
-import { escapeHtml, yearOf } from "../utils.js";
-import { matchByPerson, matchByTags, matchByQuery, sortItems } from "../logic/filters.js";
+import { escapeHtml, fmtDayMonth, yearOf } from "../utils.js";
+import { matchByPerson, matchByTags, matchByTypes, matchByQuery, sortItems } from "../logic/filters.js";
 
 // Fonction simplifiée : retourne une classe CSS au lieu d'un emoji
 function getEventTypeClass(evt) {
@@ -12,8 +12,9 @@ function getEventTypeClass(evt) {
 
 export function renderTimeline(root, data, state) {
   let events = data.events.filter(e => 
-      matchByPerson(e, state.activePerson) && 
-      matchByTags(e, state.activeTags) && 
+      matchByPerson(e, state.activePerson, data) && 
+      matchByTags(e, state.activeTags, data) &&
+      matchByTypes(e, state.activeTypes, data) &&
       matchByQuery(e, state.query, data)
   );
   
@@ -47,7 +48,7 @@ export function renderTimeline(root, data, state) {
     
     byYear.get(y).forEach(e => {
         const typeClass = getEventTypeClass(e);
-        const dateStr = e.date ? new Date(e.date).toLocaleDateString("fr-FR", {day:"2-digit", month:"2-digit"}) : "--/--";
+        const dateStr = fmtDayMonth(e.date);
         const proofCount = e.related_docs?.length || 0;
 
         html += `

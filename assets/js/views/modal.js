@@ -13,18 +13,21 @@ export function renderModal(modalRoot, payload, data){
       const d = data.documents.find(x => x.id === id);
       if(!d) return;
 
-      // Récupération du "Lore" riche ou fallback sur le résumé standard
       const richContent = getRichDescription(d);
-      const contentDisplay = richContent 
-          ? richContent 
-          : escapeHtml(d.summary || "Aucune information disponible.");
+      const summaryDisplay = escapeHtml(d.summary || "Aucune information disponible.");
+      const narrativeBlock = richContent
+          ? `<div style="margin-top:24px; border-top:1px solid var(--border); padding-top:14px">
+                <span class="label">Analyse complémentaire</span>
+                <div class="transcription rich-text">${richContent}</div>
+             </div>`
+          : "";
 
       title = `PREUVE #${d.id.split('_')[1] || d.id}`;
       
       // Génération de la colonne images
       const imagesHtml = (d.images||[]).map(src => 
           `<a href="${escapeHtml(src)}" target="_blank" class="modal-img-link">
-             <img src="${escapeHtml(src)}" loading="lazy">
+             <img src="${escapeHtml(src)}" loading="lazy" alt="${escapeHtml(d.title)}">
              <div class="modal-img-caption">Ouvrir en haute résolution ↗</div>
            </a>`
       ).join("");
@@ -39,9 +42,14 @@ export function renderModal(modalRoot, payload, data){
                     <span class="value">${escapeHtml(fmtDate(d.date))} <span class="tag">${escapeHtml(d.type)}</span></span>
                 </div>
                 
-                <div class="transcription rich-text">
-                    ${contentDisplay}
+                <div class="detail-block">
+                    <span class="label">Résumé vérifié</span>
+                    <div class="transcription">
+                        ${summaryDisplay}
+                    </div>
                 </div>
+
+                ${narrativeBlock}
             </div>
 
             <div class="media-column">
@@ -61,13 +69,15 @@ export function renderModal(modalRoot, payload, data){
       
       title = "DOSSIER INDIVIDUEL";
 
-      // Récupération du "Lore" riche ou fallback sur le résumé standard
       const richContent = getRichDescription(p);
-      const summaryHtml = richContent 
-          ? `<div class="rich-text">${richContent}</div>` 
-          : `<div class="value">${escapeHtml(p.summary || "Aucune information.")}</div>`;
+      const summaryHtml = `<div class="value">${escapeHtml(p.summary || "Aucune information.")}</div>`;
+      const narrativeHtml = richContent
+          ? `<div class="detail-block" style="margin-top:18px">
+                <span class="label">ANALYSE COMPLÉMENTAIRE</span>
+                <div class="rich-text">${richContent}</div>
+             </div>`
+          : "";
 
-      // Récupération des documents liés
       const relatedDocs = data.documents.filter(d => (d.people || []).includes(p.id));
       
       body = `
@@ -75,9 +85,11 @@ export function renderModal(modalRoot, payload, data){
         <div style="color:var(--accent); margin-bottom:24px; font-family:var(--font-mono)">${escapeHtml(p.role)}</div>
         
         <div class="detail-block">
-            <span class="label">ANALYSE DU SUJET</span>
+            <span class="label">FICHE FACTUELLE</span>
             ${summaryHtml}
         </div>
+
+        ${narrativeHtml}
 
         <hr style="border:0; border-top:1px solid var(--border); margin:24px 0">
         
